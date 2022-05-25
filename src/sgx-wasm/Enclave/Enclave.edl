@@ -1,0 +1,259 @@
+/*
+ * Copyright (C) 2011-2016 Intel Corporation. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ *   * Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ *   * Redistributions in binary form must reproduce the above copyright
+ *     notice, this list of conditions and the following disclaimer in
+ *     the documentation and/or other materials provided with the
+ *     distribution.
+ *   * Neither the name of Intel Corporation nor the names of its
+ *     contributors may be used to endorse or promote products derived
+ *     from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ */
+
+/* Enclave.edl - Top EDL file. */
+
+enclave
+{
+  include "common.h"
+
+    trusted
+  {
+  public
+    void enclave_main([ in, string ] const char* path);
+  public
+    void enclave_spec_test([ in, string ] const char* path,
+                           [ in, string ] const char* fun_name,
+			   [ in, size = n_args ] uint64_t *args,
+			   size_t n_args,
+			   [ in, size = n_args_type ] uint8_t *args_type,
+			   size_t n_args_type,
+			   uint64_t expected,
+			   uint8_t expected_type);
+  };
+
+  /*
+   * ocall_print_string - invokes OCALL to display string buffer inside the
+   * enclave. [in]: copy the string buffer to App outside. [string]: specifies
+   * 'str' is a NULL terminated buffer.
+   */
+  untrusted
+  {
+    void ocall_print_string([ in, string ] const char* str);
+    clock_t ocall_sgx_clock();
+    time_t ocall_sgx_time([ in, out, size = 8 ] time_t * t);
+    size_t ocall_sgx_strftime([ out, size = max ] char* s,
+                              size_t max,
+                              [ in, string ] const char* format,
+                              [ in, size = 56 ] const struct tm* tm);
+    struct tm* ocall_sgx_localtime([ in, size = 8 ] const time_t* timep);
+    struct tm* ocall_sgx_gmtime([ in, size = 8 ] const time_t* timep);
+    time_t ocall_sgx_mktime([ out, size = 56 ] struct tm * tmptr);
+    int ocall_sgx_gettimeofday([ out, size = 16 ] struct timeval * tv,
+                               [ out, size = 8 ] struct timezone * tz);
+    int ocall_sgx_puts([ in, string ] const char* str);
+    int ocall_sgx_putchar(int c);
+    
+    int ocall_sgx_open(
+      [ in, string ] const char* pathname, int flags, unsigned mode) transition_using_threads;
+    //int ocall_sgx_open(
+    //  [ in, string ] const char* pathname, int flags, unsigned mode);
+
+    int ocall_sgx_close(int fd) transition_using_threads;
+    //int ocall_sgx_close(int fd);
+
+    ssize_t ocall_sgx_read(
+      int fd, [ out, size = count ] char* buf, size_t count) transition_using_threads;
+    //ssize_t ocall_sgx_read(
+    //  int fd, [ out, size = count ] char* buf, size_t count);
+
+    ssize_t ocall_sgx_write(
+      int fd, [ in, size = count ] const char* buf, size_t count) transition_using_threads;
+    //ssize_t ocall_sgx_write(
+    //  int fd, [ in, size = count ] const char* buf, size_t count);
+
+    off_t ocall_sgx_lseek(int fildes, off_t offset, int whence);
+    int ocall_sgx_socket(int af, int type, int protocol);
+    int ocall_sgx_bind(
+      int s, [ in, size = 16 ] const struct sockaddr* addr, size_t addr_size);
+    int ocall_sgx_connect(int s,
+                          [ in, size = addrlen ] const struct sockaddr* addr,
+                          size_t addrlen);
+    int ocall_sgx_listen(int s, int backlog);
+    //int ocall_sgx_accept(int s,
+    //                     [ out, size = addr_size ] struct sockaddr* addr,
+    //                     unsigned addr_size,
+    //                     [out] socklen_t* addrlen);
+    int ocall_sgx_accept(int s,
+                         [ out, size = addr_size ] struct sockaddr* addr,
+                         unsigned addr_size,
+                         [out] socklen_t* addrlen) transition_using_threads;
+    //int ocall_sgx_accept4(int s,
+    //                      [ out, size = addr_size ] struct sockaddr* addr,
+    //                      unsigned addr_size,
+    //                      [ in, out ] socklen_t* addrlen,
+    //                      int flags);
+    int ocall_sgx_accept4(int s,
+                          [ out, size = addr_size ] struct sockaddr* addr,
+                          unsigned addr_size,
+                          [ in, out ] socklen_t* addrlen,
+                          int flags) transition_using_threads;
+
+    int ocall_sgx_fstat(int fd, [ out, size = 144 ] struct stat* buf) transition_using_threads;
+    //int ocall_sgx_fstat(int fd, [ out, size = 144 ] struct stat* buf);
+
+    ssize_t ocall_sgx_send(
+      int s, [ in, size = len ] const void* buf, size_t len, int flags);
+    ssize_t ocall_sgx_recv(
+      int s, [ out, size = len ] void* buf, size_t len, int flags);
+    ssize_t ocall_sgx_sendto(
+      int sockfd,
+      [ in, size = len ] const void* buf,
+      size_t len,
+      int flags,
+      [ in, size = addrlen ] const struct sockaddr* dest_addr,
+      size_t addrlen);
+    ssize_t ocall_sgx_recvfrom(int s,
+                               [ out, size = len ] void* buf,
+                               size_t len,
+                               int flags,
+                               [ out, size = alen ] struct sockaddr* dest_addr,
+                               unsigned alen,
+                               [out] socklen_t* addrlen);
+    ssize_t ocall_sgx_sendfile(
+      int out_fd, int in_fd, [ in, out, size = 8 ] off_t* s, size_t count);
+    int ocall_sgx_gethostname([ out, size = namelen ] char* name,
+                              size_t namelen);
+    int ocall_sgx_getaddrinfo([ in, string ] const char* node,
+                              [ in, string ] const char* service,
+                              [ in, size = 48 ] const struct addrinfo* hints,
+                              [out] unsigned long* res);
+    char* ocall_sgx_getenv([ in, string ] const char* env);
+    int ocall_sgx_getsockname(int s,
+                              [ out, size = nlen ] struct sockaddr* name,
+                              unsigned nlen,
+                              [out] socklen_t* addrlen);
+    int ocall_sgx_getsockopt(int s,
+                             int level,
+                             int optname,
+                             [ out, size = len ] void* optval,
+                             unsigned len,
+                             [out] socklen_t* optlen);
+    struct servent* ocall_sgx_getservbyname([ in, string ] const char* name,
+                                            [ in, string ] const char* proto);
+    struct protoent* ocall_sgx_getprotobynumber(int proto);
+    
+    int ocall_sgx_setsockopt(int s,
+                             int level,
+                             int optname,
+                             [ in, size = optlen ] const void* optval,
+                             size_t optlen) transition_using_threads;
+    //int ocall_sgx_setsockopt(int s,
+    //                         int level,
+    //                         int optname,
+    //                         [ in, size = optlen ] const void* optval,
+    //                         size_t optlen);
+
+    unsigned short ocall_sgx_htons(unsigned short hostshort);
+    unsigned long ocall_sgx_htonl(unsigned long hostlong);
+    unsigned short ocall_sgx_ntohs(unsigned short netshort);
+    unsigned long ocall_sgx_ntohl(unsigned long netlong);
+    sighandler_t ocall_sgx_signal(int signum, sighandler_t a);
+    //int ocall_sgx_shutdown(int a, int b);
+    int ocall_sgx_shutdown(int a, int b) transition_using_threads;
+    FILE* ocall_sgx_fopen([ in, string ] const char* filename,
+                          [ in, string ] const char* mode);
+    FILE* ocall_sgx_fdopen(int fd, [ in, string ] const char* mode);
+    int ocall_sgx_fclose([user_check] FILE * stream);
+    size_t ocall_sgx_fwrite(
+      [ in, size = size, count = count ] const void* buffer,
+      size_t size,
+      size_t count,
+      [user_check] FILE* stream);
+    size_t ocall_sgx_fwritex([ in, size = size ] const unsigned char* buffer,
+                             size_t size,
+                             [user_check] FILE* stream);
+    size_t ocall_sgx_fread([ out, size = size, count = count ] void* buffer,
+                           size_t size,
+                           size_t count,
+                           [user_check] FILE* stream);
+    int ocall_sgx_fseek([user_check] FILE * file, long offset, int origin);
+    //int ocall_sgx_open64(
+    //  [ in, string ] const char* pathname, int flags, unsigned mode);
+    int ocall_sgx_open64(
+      [ in, string ] const char* pathname, int flags, unsigned mode) transition_using_threads;
+    off_t ocall_sgx_lseek64(int fildes, off_t offset, int whence);
+    char* ocall_sgx_getcwd([ out, size = size ] char* buf, size_t size);
+    pid_t ocall_sgx_getpid();
+    uid_t ocall_sgx_getuid();
+    uid_t ocall_sgx_geteuid();
+    gid_t ocall_sgx_getgid();
+    gid_t ocall_sgx_getegid();
+    //int ocall_sgx_fcntl(
+    //  int fd, int cmd, [ in, size = size ] void* arg, size_t size);
+    int ocall_sgx_fcntl(
+      int fd, int cmd, [ in, size = size ] void* arg, size_t size) transition_using_threads;
+    int ocall_sgx_stat([ in, string ] const char* pathname,
+                       [ out, size = 144 ] struct stat* statbuf);
+    int ocall_sgx_fchmod(int fd, mode_t mode);
+    int ocall_sgx_fsync(int fd);
+    int ocall_sgx_unlink([ in, string ] const char* pathname);
+    int ocall_sgx_dup(int oldfd);
+    int ocall_sgx_dup2(int oldfd, int newfd);
+    int ocall_sgx_getrlimit(int resource,
+                            [ out, size = 16 ] struct rlimit* rlim);
+    int ocall_sgx_poll([ in, out, size = size ] struct pollfd * fds,
+                       size_t size,
+                       nfds_t nfds,
+                       int timeout) transition_using_threads;
+    //int ocall_sgx_poll([ in, out, size = size ] struct pollfd * fds,
+    //                   size_t size,
+    //                   nfds_t nfds,
+    //                   int timeout);
+
+    int ocall_sgx_ioctl(int fd,
+                        unsigned long request,
+                        [ in, out, size = size ] void* arg,
+                        size_t size) transition_using_threads;
+    //int ocall_sgx_ioctl(int fd,
+    //                    unsigned long request,
+    //                    [ in, out, size = size ] void* arg,
+    //                    size_t size);
+
+    char* ocall_sgx_inet_ntop(int af,
+                              [ in, size = 4 ] const void* src,
+                              [ out, size = size ] char* dst,
+                              socklen_t size) transition_using_threads;
+    //char* ocall_sgx_inet_ntop(int af,
+    //                          [ in, size = 4 ] const void* src,
+    //                          [ out, size = size ] char* dst,
+    //                          socklen_t size);
+    char* ocall_sgx_inet_ntoa(struct in_addr in);
+
+    unsigned int ocall_sgx_inet_addr([ in, string ] const char* cp)transition_using_threads;
+    //unsigned int ocall_sgx_inet_addr([ in, string ] const char* cp);
+
+    int ocall_sgx_inet_pton(
+      int af, [ in, string ] const char* src, [ out, size = 4 ] void* dst);
+    int ocall_sgx_geterrno();
+    unsigned long ocall_sgx_rdtsc();
+  };
+};

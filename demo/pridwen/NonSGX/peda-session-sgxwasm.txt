@@ -1,0 +1,3 @@
+break emscripten_invoke_main
+
+

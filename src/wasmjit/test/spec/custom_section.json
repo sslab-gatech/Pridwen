@@ -1,0 +1,11 @@
+{"source_filename": "custom_section.wast",
+ "commands": [
+  {"type": "module", "line": 1, "filename": "custom_section.0.wasm"}, 
+  {"type": "module", "line": 14, "filename": "custom_section.1.wasm"}, 
+  {"type": "module", "line": 50, "filename": "custom_section.2.wasm"}, 
+  {"type": "assert_malformed", "line": 61, "filename": "custom_section.3.wasm", "text": "unexpected end", "module_type": "binary"}, 
+  {"type": "assert_malformed", "line": 69, "filename": "custom_section.4.wasm", "text": "unexpected end", "module_type": "binary"}, 
+  {"type": "assert_malformed", "line": 77, "filename": "custom_section.5.wasm", "text": "unexpected end", "module_type": "binary"}, 
+  {"type": "assert_malformed", "line": 85, "filename": "custom_section.6.wasm", "text": "invalid section id", "module_type": "binary"}, 
+  {"type": "assert_malformed", "line": 94, "filename": "custom_section.7.wasm", "text": "function and code section have inconsistent lengths", "module_type": "binary"}, 
+  {"type": "assert_malformed", "line": 107, "filename": "custom_section.8.wasm", "text": "length out of bounds", "module_type": "binary"}]}

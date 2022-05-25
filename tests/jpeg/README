@@ -1,0 +1,2 @@
+# Clang with llvm pass
+$ ../../llvm/build/bin/clang -Xclang -load -Xclang ../../../loop-analysis-pass/build/loop-analysis/libLoopAnalysisPass.so -fPIC -fno-asynchronous-unwind-tables -fno-jump-tables -c src/jdcolor.c
